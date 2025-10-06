@@ -24,4 +24,7 @@ This project is designed for **learning and experimentation**, demonstrating:
 ## Technology Stack
 - **Frontend:** HTML5, CSS3, JavaScript  
 - **Visualization:** Canvas API  
-- **AI:** Fully connected feedforward neural network implemented in JavaScript  
+- **AI:** Fully connected feedforward neural network implemented in JavaScript
+## Technology Stack
+  Visit the live demo: [Self-Driving Car Simulation](https://ashrita2004.github.io/Self-Driving-Car/)
+
