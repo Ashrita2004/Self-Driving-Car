@@ -22,11 +22,13 @@ class Car{
        // 🔑 CRITICAL FIX: Only DUMMY cars get a control object initially.
         // AI cars start with an UNSET placeholder.
         if (controlType === "DUMMY") {
-            this.controls = new Control("DUMMY");
+             this.controls = new Control("DUMMY");
+        } else if (controlType === "AI") {
+            this.controls = new Control("AI");
         } else {
-            // Placeholder: The animate loop will create the proper Control("AI") or Control("KEYS")
-            this.controls = {type: "UNSET", forward: false, reverse: false, left: false, right: false}; 
+            this.controls = new Control("KEYS");
         }
+
         this.img=new Image();
         this.img.src="download.png";
 
@@ -45,16 +47,29 @@ class Car{
         }
     }
 
-    update(roadBorders,traffic){
-        if(!this.damaged){
-            this.#move();
-            this.polygon=this.#createPolygon();
-            this.damaged=this.#assessDamage(roadBorders,traffic);
-        } 
-        if (this.sensor && !this.damaged) {
-        this.sensor.update(roadBorders, traffic);
+    update(roadBorders, traffic) {
+    if (!this.damaged) {
+        // 1️⃣ Move
+        this.#move();
+        this.polygon = this.#createPolygon();
+        this.damaged = this.#assessDamage(roadBorders, traffic);
+
+        // 2️⃣ Update sensor
+        if (this.sensor) this.sensor.update(roadBorders, traffic);
+
+        // 3️⃣ Apply AI if this car is AI
+        if (this.controls.type === "AI" && this.sensor) {
+            const offsets = this.sensor.readings.map(s => s == null ? 0 : 1 - s.offset);
+            const outputs = NeuralNetwork.feedForward(offsets, this.brain);
+
+            this.controls.forward = outputs[0] > 0.3;
+            this.controls.left    = outputs[1] > 0.5;
+            this.controls.right   = outputs[2] > 0.5;
+            this.controls.reverse = outputs[3] > 0.5;
         }
     }
+}
+
 
     #assessDamage(roadBorders,traffic){
         for(let i=0;i<roadBorders.length;i++){
