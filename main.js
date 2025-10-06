@@ -16,17 +16,15 @@ let road = new Road(carCanvas.width/2,carCanvas.width*0.9);
 const N=100;
 let cars = generateCars(N);
 let bestCar=cars[0];
-if(localStorage.getItem("bestBrain")){
-    const bestBrain = JSON.parse(localStorage.getItem("bestBrain"));
-    bestCar.brain = bestBrain;
+if(localStorage.getItem("bestBrain"))
     for(let i=0;i<cars.length;i++){
         cars[i].brain=JSON.parse(
             localStorage.getItem("bestBrain"));
-        if(i!=0){
+        if(i>0){
             NeuralNetwork.mutate(cars[i].brain,0.1);
         }
     }
-}
+
 document.getElementById('manualModeToggle').onchange = (event) => {
     manualMode = event.target.checked;
     //bestCar.controls = new Control(manualMode ? "KEYS" : "AI");
@@ -87,10 +85,9 @@ document.onkeyup = (event) => {
 animate(0);
 
 function save(){
-    if(bestCar && bestCar.brain) {
-        localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
-    }
-}    
+   localStorage.setItem("bestBrain",
+      JSON.stringify(bestCar.brain));
+}  
 
 function discard(){
     localStorage.removeItem("bestBrain");
