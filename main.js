@@ -17,6 +17,8 @@ const N=100;
 let cars = generateCars(N);
 let bestCar=cars[0];
 if(localStorage.getItem("bestBrain")){
+    const bestBrain = JSON.parse(localStorage.getItem("bestBrain"));
+    bestCar.brain = bestBrain;
     for(let i=0;i<cars.length;i++){
         cars[i].brain=JSON.parse(
             localStorage.getItem("bestBrain"));
@@ -39,7 +41,7 @@ for (let i = 0; i < DUMMY_COUNT; i++) {
     const lane = Math.floor(Math.random() * 4); // random lane 0,1,2,3
 
     // Increase Y by a large negative gap (to move upward / away)
-    const gap = Math.floor(Math.random() * 300) + 800; // 800–1500px gap
+    const gap = Math.floor(Math.random() * 30) + 100; // 800–1500px gap
     currentY -= gap;
 
     traffic.push(
@@ -85,9 +87,10 @@ document.onkeyup = (event) => {
 animate(0);
 
 function save(){
-    localStorage.setItem("bestBrain",
-        JSON.stringify(bestCar.brain));
-}
+    if(bestCar && bestCar.brain) {
+        localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
+    }
+}    
 
 function discard(){
     localStorage.removeItem("bestBrain");
@@ -167,6 +170,26 @@ function animate(time){
     }
     document.getElementById('bestDistance').innerText = `${bestDistance.toFixed(2)} m`;
 
+    const allDamaged = cars.every(c => c.damaged);
+    if (allDamaged || bestCar.y < -30000) { // Also stop after a significant distance to cycle
+                
+        // Save the brain of the furthest car for the next generation's basis
+        save(); 
+
+                // Reset cars for the next generation (This is the "learning" step)
+        generationCount++;
+        cars = generateCars(N);
+
+                // Apply the saved best brain and mutate
+        const savedBrain = JSON.parse(localStorage.getItem("bestBrain"));
+        if (savedBrain) {
+            cars[0].brain = savedBrain;
+            for (let i = 1; i < cars.length; i++) {
+                cars[i].brain = JSON.parse(JSON.stringify(savedBrain));
+                NeuralNetwork.mutate(cars[i].brain, 0.1); 
+            }
+        }
+    }
     carCtx.save();
     carCtx.translate(0,-bestCar.y+carCanvas.height*0.7);
 
