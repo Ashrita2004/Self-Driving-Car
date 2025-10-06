@@ -3,15 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <title>Self Driving car</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <canvas id="carCanvas"></canvas>
-    <div id="verticalButtons">
-        <button onclick="save()">✅</button>
-        <button onclick="discard()">❌</button>
+    <div id="ui-panel" class="w-1/5 min-w-[300px] flex flex-col space-y-4 pt-8">
+        <h1 class="text-2xl font-bold text-center text-cyan-400">Self Driving Car Stimulation</h1>
+        <!-- Controls -->
+        <div>
+            <h2 class="text-lg font-semibold mb-2">Training Control</h2>
+            <div class="flex space-x-2">
+                <button id="saveButton" class="flex-1 py-2 rounded-lg button-primary" onclick="save()">Save Best Brain</button>
+                <button id="discardButton" class="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700" onclick="discard()">Discard Brain</button>
+            </div>
+            <p class="text-sm mt-2 text-gray-400">New generation starts when all cars crash.</p>
+        </div>
+
+        <!-- Real-Time Metrics -->
+        <div>
+            <h2 class="text-lg font-semibold mt-4 mb-2">Metrics</h2>
+            <div id="metrics" class="space-y-2">
+                <div class="data-card">
+                    <span class="text-gray-300">Generation</span>
+                    <span id="genCount" class="text-xl font-mono text-amber-300">1</span>
+                </div>
+                <div class="data-card">
+                    <span class="text-gray-300">Cars Alive</span>
+                    <span id="carsAlive" class="text-xl font-mono text-green-400">0 / 0</span>
+                </div>
+                <div class="data-card">
+                    <span class="text-gray-300">Best Distance</span>
+                    <span id="bestDistance" class="text-xl font-mono text-fuchsia-400">0.00 m</span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h2 class="text-lg font-semibold mb-2">Mode Selection</h2>
+            <div class="flex items-center justify-between data-card border-none bg-[#3f3f5a]">
+                <span class="text-gray-300">Manual Mode</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" value="" class="sr-only peer" id="manualModeToggle">
+                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                </label>
+            </div>
+        </div>
     </div>
-    <canvas id="networkCanvas"></canvas>
+
+    <div id="simulation-container">
+        <canvas id="carCanvas"></canvas>
+    </div>
+    
+   <div id="network-panel">
+        <h2 class="text-xl font-bold mb-4 text-center text-cyan-400">Network Visualization</h2>
+        <canvas id="networkCanvas" class="w-auto h-auto"></canvas>
+        <p class="text-xs text-gray-400 mt-4">Node brightness indicates activation level.</p>
+    </div>
+    
     <script src="network.js"></script>
     <script src="visualizer.js"></script>
     <script src="sensor.js"></script>

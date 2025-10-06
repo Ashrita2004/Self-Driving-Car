@@ -1,5 +1,5 @@
 class Car{
-    constructor(x,y,width,height,controlType,maxSpeed, color="lightblue"){
+    constructor(x,y,width,height,controlType,maxSpeed){
         this.x = x;
         this.y = y;
         this.width = width;
@@ -19,9 +19,16 @@ class Car{
                 [this.sensor.rayCount,6,4]
             );
         }
-        this.controls = new Control(controlType);
+       // 🔑 CRITICAL FIX: Only DUMMY cars get a control object initially.
+        // AI cars start with an UNSET placeholder.
+        if (controlType === "DUMMY") {
+            this.controls = new Control("DUMMY");
+        } else {
+            // Placeholder: The animate loop will create the proper Control("AI") or Control("KEYS")
+            this.controls = {type: "UNSET", forward: false, reverse: false, left: false, right: false}; 
+        }
         this.img=new Image();
-        this.img.src="car.png";
+        this.img.src="download.png";
 
         this.mask=document.createElement("canvas");
         this.mask.width=width;
@@ -44,19 +51,8 @@ class Car{
             this.polygon=this.#createPolygon();
             this.damaged=this.#assessDamage(roadBorders,traffic);
         } 
-        if(this.sensor){
-            this.sensor.update(roadBorders,traffic);
-            const offsets=this.sensor.readings.map(
-                s=>s==null?0:1-s.offset
-            );
-            const outputs=NeuralNetwork.feedForward(offsets,this.brain);
-
-            if(this.useBrain){
-                this.controls.forward=outputs[0];
-                this.controls.left=outputs[1];
-                this.controls.right=outputs[2];
-                this.controls.reverse=outputs[3];
-            }
+        if (this.sensor && !this.damaged) {
+        this.sensor.update(roadBorders, traffic);
         }
     }
 
@@ -125,16 +121,29 @@ class Car{
         if(Math.abs(this.speed)<this.friction){
             this.speed=0;
         }
-        if(this.speed!=0){
-            const flip=this.speed>0?1:-1
-            
-            if(this.controls.left){
-                this.angle+=0.03*flip;
+        if(this.speed != 0 || this.controls.forward || this.controls.reverse){
+        
+        // CRITICAL: Determine the intended direction (flip) based on controls
+            let flip = 0;
+            if(this.controls.forward || (this.controls.reverse && this.speed > 0) ) {
+                flip = 1; // Moving forward (or intended forward)
+            } else if (this.controls.reverse || (this.controls.forward && this.speed < 0) ) {
+                flip = -1; // Moving backward (or intended backward)
+            } else if (this.speed != 0) {
+            // Use current speed if no controls are pressed (for coasting movement)
+                flip = this.speed > 0 ? 1 : -1;
             }
-            if(this.controls.right){
-                this.angle-=0.03*flip;
+
+        // Only allow turning if a direction (flip) has been determined
+            if (flip !== 0) { 
+                if(this.controls.left){
+                    this.angle += 0.03 * flip;
+                }
+                if(this.controls.right){
+                    this.angle -= 0.03 * flip;
+                }
             }
-        }    
+        }     
         this.x-=Math.sin(this.angle)*this.speed;
         this.y-=Math.cos(this.angle)*this.speed;
     }

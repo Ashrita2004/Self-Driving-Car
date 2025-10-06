@@ -4,18 +4,19 @@ class Control{
         this.left=false;
         this.right=false;
         this.reverse=false;
+        this.type = type;
 
         switch(type){
-            case "KEYS":
+            /*case "KEYS":
                 this.#addKeyboardListeners();
-                break;
+                break;*/
             case "DUMMY":
                 this.forward=true;
                 break;    
         }
     }
 
-    #addKeyboardListeners(){
+/*    #addKeyboardListeners(){
         document.onkeydown=(event)=>{
             switch(event.key){
                 case "ArrowLeft":
@@ -53,5 +54,5 @@ class Control{
 
 
         }
-    }
+    } */
 }
